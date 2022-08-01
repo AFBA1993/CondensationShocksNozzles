@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Nov 26 19:16:33 2019
+
+@author: andres777
+"""
+
+import numpy as np
+from Coollib import Cool_Psat
+from scipy.optimize import fsolve
+from Twophase import fnd_2phase_exp
+import math 
+
+def prop_mix(P,X,f,EoS):
+    Prop=Cool_Psat(P,f,EoS)
+    Tmix=Prop[1]
+    
+    rhog=1/Prop[2]
+    hg=Prop[3]
+    sg=Prop[4]
+    
+    hl=Prop[7]
+    sl=Prop[8]
+    
+    Pmix=P
+    rhomix=rhog/X
+    hmix=X*hg+(1-X)*hl
+    smix=X*sg+(1-X)*sl
+    
+    return Pmix, rhomix, Tmix, hmix, smix
+
+
+def Moore_nozzle(x):
+  xth=2
+  if x<=xth:
+    Ar=-0.0625*x+1.127
+  if x>xth:
+    Ar=0.088*x+0.824
+  return Ar
+
+def Barschdorff_nozzle(x):
+  A=3.00E-15
+  B=1.00E-12
+  C=2.00E-10
+  D=8.00E-09
+  E=3.00E-05
+  F=2.00E-06
+  G=1.00E+00
+  xth=0
+  if x<xth:
+    y=A*x**6.0+B*x**5.0+C*x**4.0+D*x**3.0+E*x**2+F*x+G
+  
+  if x>=xth:
+    x=-x
+    y=A*x**6.0+B*x**5.0+C*x**4.0+D*x**3.0+E*x**2+F*x+G
+  
+  return y
+
+
+f="Water"
+EoS="PR"
+uc=480
+Pc=37558.99076411
+Xc=0.997#"Capital X vapor quality"
+
+
+xc=56
+Ath=1
+Ac=Barschdorff_nozzle(xc)*Ath
+
+xf=120
+diff=xf-xc
+ne=2
+
+
+stp=diff/ne
+
+
+Ai=np.zeros(ne)
+xi=np.zeros(ne)
+Xi=np.zeros(ne)
+Yi=np.zeros(ne)
+Pi=np.zeros(ne)
+ui=np.zeros(ne)
+si=np.zeros(ne)
+hi=np.zeros(ne)
+
+x=xc    
+    
+
+
+
+
+
+for i in range (ne):
+    if i==0:
+        propi=prop_mix(Pc,Xc,f,EoS)
+        ui[i]=uc
+        Xi[i]=Xc
+        Yi[i]=1-Xc
+        xi[i]=xc
+        hi[i]=prop_mix[3]
+        si[i]=propi[4]
+    
+    if i>0:
+        A2=Barschdorff_nozzle(x)*Ath
+        P2=fnd_2phase_exp(Pc,-0.002*Pc,uc,Pc,Xc,Ac,A2,f,EoS)
+        Prop2=Cool_Psat(P2,f,EoS)
+        
+        rho2g=1/Prop2[2]
+        h2g=Prop2[3]
+        s2g=Prop2[4]
+        h2l=Prop2[7]
+        s2l=Prop2[8]
+        X2=(si[0]-s2l)/(s2g-s2l)
+        
+    
+    
+    x=x+stp
+        
+    
+        
+        
+        
+        
+    
+
+    
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
